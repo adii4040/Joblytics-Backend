@@ -2,7 +2,7 @@ import { asyncHandler } from '../utils/AsyncHandler.utils.js'
 import { ApiError } from '../utils/ApiError.utils.js'
 import { ApiResponse } from '../utils/ApiResponse.utils.js'
 import getStartDateForRange from '../utils/DateRange.utils.js'
-
+import { getPerformanceReport, getSuccessRateReport, getAppliedToInterviewReport, getInterviewToOfferReport, getOfferAcceptanceReport, getRejectionRateReport } from '../utils/AnalyticsReports.utils.js'
 
 import Application from '../models/application.model.js'
 import mongoose from 'mongoose'
@@ -22,210 +22,6 @@ const analyticOverview = asyncHandler(async (req, res) => {
 
     const initialDate = getStartDateForRange(range);
 
-    // const aggregationPipeline = [
-    //     {
-    //         $match: {
-    //             userId: userObjId,
-    //             appliedDate: {
-    //                 $gte: initialDate,
-    //                 $lte: new Date()
-    //             }
-    //         }
-    //     },
-
-    //     // Group by applicationStatus
-    //     {
-    //         $group: {
-    //             _id: "$applicationStatus",
-    //             applicationCount: { $sum: 1 }
-    //         }
-    //     },
-
-    //     // Normalize structure so we can carry status forward
-    //     {
-    //         $project: {
-    //             status: "$_id",
-    //             applicationCount: 1,
-    //             _id: 0
-    //         }
-    //     },
-
-    //     // Global aggregation
-    //     {
-    //         $group: {
-    //             _id: null,
-    //             totalApplications: { $sum: "$applicationCount" },
-
-    //             acceptedCount: {
-    //                 $sum: {
-    //                     $cond: [
-    //                         { $eq: ["$status", "Accepted"] },
-    //                         "$applicationCount",
-    //                         0
-    //                     ]
-    //                 }
-    //             },
-
-    //             offeredCount: {
-    //                 $sum: {
-    //                     $cond: [
-    //                         { $eq: ["$status", "Offered"] },
-    //                         "$applicationCount",
-    //                         0
-    //                     ]
-    //                 }
-    //             },
-
-    //             interviewingCount: {
-    //                 $sum: {
-    //                     $cond: [
-    //                         { $eq: ["$status", "Interviewing"] },
-    //                         "$applicationCount",
-    //                         0
-    //                     ]
-    //                 }
-    //             },
-
-    //             appliedCount: {
-    //                 $sum: {
-    //                     $cond: [
-    //                         { $eq: ["status", "Applied"] },
-    //                         "$applicationCount",
-    //                         0
-    //                     ]
-    //                 }
-    //             },
-
-    //             withdrawnCount: {
-    //                 $sum: {
-    //                     $cond: [
-    //                         { $eq: ["$status", "Withdrawn"] },
-    //                         "$applicationCount",
-    //                         0
-    //                     ]
-    //                 }
-    //             },
-
-    //             rejectedCount: {
-    //                 $sum: {
-    //                     $cond: [
-    //                         { $eq: ["$status", "Rejected"] },
-    //                         "$applicationCount",
-    //                         0
-    //                     ]
-    //                 }
-    //             },
-
-    //         },
-    //     },
-
-    //     // Final computed metrics
-    //     {
-    //         $project: {
-    //             _id: 0,
-    //             total_Applications: "$totalApplications",
-    //             accepted_Applications: "$acceptedCount",
-    //             offered_Applications: "$offeredCount",
-    //             interviewing_Applications: "$interviewingCount",
-    //             applied_Applications: "$appliedCount",
-    //             withdrawn_Applications: "$withdrawnCount",
-    //             rejected_Applications: "$rejectedCount",
-
-
-
-    //             //1. Success Rate (Acceptance Rate)
-    //             success_rate: {
-    //                 $multiply: [
-    //                     {
-    //                         $cond: [
-    //                             { $eq: ["$totalApplications", 0] },
-    //                             0,
-    //                             { $divide: ["$acceptedCount", "$totalApplications"] }
-    //                         ]
-    //                     },
-    //                     100
-    //                 ]
-    //             },
-
-    //             //2. Performance Rate
-    //             performance_rate: {
-    //                 $multiply: [
-    //                     {
-    //                         $cond: [
-    //                             { $eq: ["$totalApplications", 0] },
-    //                             0,
-    //                             {
-    //                                 $divide: [
-    //                                     { $add: ["$acceptedCount", "$offeredCount"] },
-    //                                     "$totalApplications"
-    //                                 ]
-    //                             }
-    //                         ]
-    //                     },
-    //                     100
-    //                 ]
-    //             },
-
-    //             //3. Applied -> Interview Conversion
-    //             applied_to_interview_conversion_rate: {
-    //                 $multiply: [
-    //                     {
-    //                         $cond: [
-    //                             { $eq: ["$appliedCount", 0] },
-    //                             0,
-    //                             { $divide: ["$interviewingCount", "$appliedCount"] }
-    //                         ]
-    //                     },
-    //                     100
-    //                 ]
-    //             },
-
-    //             //4. Interview → Offer Conversion
-    //             interview_to_offer_conversion_rate: {
-    //                 $multiply: [
-    //                     {
-    //                         $cond: [
-    //                             { $eq: ["$interviewingCount", 0] },
-    //                             0,
-    //                             { $divide: ["$offeredCount", "$interviewingCount"] }
-    //                         ]
-    //                     },
-    //                     100
-    //                 ]
-    //             },
-
-    //             //5. Offer Acceptance Rate
-
-    //             offer_acceptance_rate: {
-    //                 $multiply: [
-    //                     {
-    //                         $cond: [
-    //                             { $eq: ["$offeredCount", 0] },
-    //                             0,
-    //                             { $divide: ["$acceptedCount", "$offeredCount"] }
-    //                         ]
-    //                     },
-    //                     100
-    //                 ]
-    //             },
-
-    //             //6. Rejection Rate
-    //             rejection_rate: {
-    //                 $multiply: [
-    //                     {
-    //                         $cond: [
-    //                             { $eq: ["$totalApplications", 0] },
-    //                             0,
-    //                             { $divide: ["$rejectedCount", "$totalApplications"] }
-    //                         ]
-    //                     },
-    //                     100
-    //                 ]
-    //             }
-    //         }
-    //     }
-    // ];
-
 
     const aggregationPipeline = [
         // 1) filter by user and date range
@@ -241,12 +37,6 @@ const analyticOverview = asyncHandler(async (req, res) => {
             $facet: {
                 statusMetrics: [
                     { $group: { _id: "$applicationStatus", count: { $sum: 1 } } }
-                ],
-                workLocationMetrics: [
-                    { $group: { _id: "$workLocationType", count: { $sum: 1 } } }
-                ],
-                jobTypeMetrics: [
-                    { $group: { _id: "$workType", count: { $sum: 1 } } }
                 ],
                 timelineMetrics: [
                     { $group: { _id: { $month: "$appliedDate" }, count: { $sum: 1 } } }
@@ -268,10 +58,63 @@ const analyticOverview = asyncHandler(async (req, res) => {
                             },
                             interviewing: {
                                 $sum: { $cond: [{ $eq: ["$applicationStatus", "Interviewing"] }, 1, 0] }
-                            }
+                            },
+                            applied: {
+                                $sum: { $cond: [{ $eq: ["$applicationStatus", "Applied"] }, 1, 0] }
+                            },
                         }
                     },
                     { $sort: { total: -1 } }
+                ],
+
+                workTypeMetrics: [
+                    {
+                        $group: {
+                            _id: '$workType',
+                            total: { $sum: 1 },
+                            offered: {
+                                $sum: { $cond: [{ $eq: ["$applicationStatus", "Offered"] }, 1, 0] }
+                            },
+                            accepted: {
+                                $sum: { $cond: [{ $eq: ["$applicationStatus", "Accepted"] }, 1, 0] }
+                            },
+                            rejected: {
+                                $sum: { $cond: [{ $eq: ["$applicationStatus", "Rejected"] }, 1, 0] }
+                            },
+                            interviewing: {
+                                $sum: { $cond: [{ $eq: ["$applicationStatus", "Interviewing"] }, 1, 0] }
+                            },
+                            applied: {
+                                $sum: { $cond: [{ $eq: ["$applicationStatus", "Applied"] }, 1, 0] }
+                            },
+
+                        }
+                    }
+                ],
+
+                workLocationMetrics: [
+                    {
+                        $group: {
+                            _id: '$workLocationType',
+                            total: { $sum: 1 },
+                            offered: {
+                                $sum: { $cond: [{ $eq: ["$applicationStatus", "Offered"] }, 1, 0] }
+                            },
+                            accepted: {
+                                $sum: { $cond: [{ $eq: ["$applicationStatus", "Accepted"] }, 1, 0] }
+                            },
+                            rejected: {
+                                $sum: { $cond: [{ $eq: ["$applicationStatus", "Rejected"] }, 1, 0] }
+                            },
+                            interviewing: {
+                                $sum: { $cond: [{ $eq: ["$applicationStatus", "Interviewing"] }, 1, 0] }
+                            },
+                            applied: {
+                                $sum: { $cond: [{ $eq: ["$applicationStatus", "Applied"] }, 1, 0] }
+                            },
+
+                        }
+                    }
                 ]
 
             }
@@ -296,41 +139,7 @@ const analyticOverview = asyncHandler(async (req, res) => {
                         },
                         {} // empty object if no statuses
                     ]
-                },
-
-                //CATEGORY 2 — Work Location Metrics
-                workLocationObj: {
-                    $cond: [
-                        { $gt: [{ $size: '$workLocationMetrics' }, 0] },
-                        {
-                            $arrayToObject: {
-                                $map: {
-                                    input: '$workLocationMetrics',
-                                    in: { k: '$$this._id', v: '$$this.count' }
-                                }
-                            }
-                        },
-                        {}
-                    ]
-                },
-
-                //CATEGORY 3 — Job Type Metrics
-                jobTypeObj: {
-                    $cond: [
-                        { $gt: [{ $size: "$jobTypeMetrics" }, 0] },
-                        {
-                            $arrayToObject: {
-                                $map: {
-                                    input: "$jobTypeMetrics",
-                                    in: { k: "$$this._id", v: "$$this.count" }
-                                }
-                            }
-                        },
-                        {}
-                    ]
-                },
-
-
+                }
             }
         },
 
@@ -347,17 +156,8 @@ const analyticOverview = asyncHandler(async (req, res) => {
                 rejected: { $ifNull: ["$statusObj.Rejected", 0] },
                 withdrawn: { $ifNull: ["$statusObj.Withdrawn", 0] },
 
-                /*-----------Work Location Type Metrics Fields------------*/
-                remoteJobs: { $ifNull: ["$workLocationObj.Remote", 0] },
-                hybridJobs: { $ifNull: ["$workLocationObj.Hybrid", 0] },
-                onSiteJobs: { $ifNull: ["$workLocationObj.On-Site", 0] },
 
-
-                /*----------Job Type Metrics Fields---------*/
-                Jobs: { $ifNull: ["$jobTypeObj.Job", 0] },
-                Internships: { $ifNull: ["$jobTypeObj.Internship", 0] },
-
-
+                /*----------Source Metrics with all the required status rates Calculations---------*/
                 sources: {
                     $map: {
                         input: "$sourceMetrics",
@@ -368,6 +168,78 @@ const analyticOverview = asyncHandler(async (req, res) => {
                             offered: "$$this.offered",
                             interviewing: "$$this.interviewing",
                             rejected: "$$this.rejected",
+                            applied: "$$this.applied",
+
+                            successRate: {
+                                $multiply: [
+                                    {
+                                        $cond: [
+                                            { $eq: ["$$this.total", 0] },
+                                            0,
+                                            { $divide: ["$$this.accepted", "$$this.total"] }
+                                        ]
+                                    },
+                                    100
+                                ]
+                            },
+
+                            offerRate: {
+                                $multiply: [
+                                    {
+                                        $cond: [
+                                            { $eq: ["$$this.total", 0] },
+                                            0,
+                                            { $divide: ["$$this.offered", "$$this.total"] }
+                                        ]
+                                    },
+                                    100
+                                ]
+                            },
+
+                            interviewRate: {
+                                $multiply: [
+                                    {
+                                        $cond: [
+                                            { $eq: ["$$this.total", 0] },
+                                            0,
+                                            { $divide: ["$$this.interviewing", "$$this.total"] }
+                                        ]
+                                    },
+                                    100
+                                ]
+                            },
+
+                            offerAcceptanceRate: {
+                                $multiply: [
+                                    {
+                                        $cond: [
+                                            { $eq: ["$$this.offered", 0] },
+                                            0,
+                                            { $divide: ["$$this.accepted", "$$this.offered"] }
+                                        ]
+                                    },
+                                    100
+                                ]
+                            },
+
+
+                        }
+                    }
+                },
+
+
+                /*----------Work Type Metrics with all the required status rates Calculations---------*/
+                workType: {
+                    $map: {
+                        input: "$workTypeMetrics",
+                        in: {
+                            workType: "$$this._id",
+                            total: "$$this.total",
+                            accepted: "$$this.accepted",
+                            offered: "$$this.offered",
+                            interviewing: "$$this.interviewing",
+                            rejected: "$$this.rejected",
+                            applied: "$$this.applied",
 
                             successRate: {
                                 $multiply: [
@@ -422,7 +294,76 @@ const analyticOverview = asyncHandler(async (req, res) => {
                             }
                         }
                     }
-                }
+                },
+
+
+                /*----------Work Location Type Metrics with all the required status rates Calculations---------*/
+                workLocationType: {
+                    $map: {
+                        input: "$workLocationMetrics",
+                        in: {
+                            workLocationType: "$$this._id",
+                            total: "$$this.total",
+                            accepted: "$$this.accepted",
+                            offered: "$$this.offered",
+                            interviewing: "$$this.interviewing",
+                            rejected: "$$this.rejected",
+                            applied: "$$this.applied",
+
+                            successRate: {
+                                $multiply: [
+                                    {
+                                        $cond: [
+                                            { $eq: ["$$this.total", 0] },
+                                            0,
+                                            { $divide: ["$$this.accepted", "$$this.total"] }
+                                        ]
+                                    },
+                                    100
+                                ]
+                            },
+
+                            offerRate: {
+                                $multiply: [
+                                    {
+                                        $cond: [
+                                            { $eq: ["$$this.total", 0] },
+                                            0,
+                                            { $divide: ["$$this.offered", "$$this.total"] }
+                                        ]
+                                    },
+                                    100
+                                ]
+                            },
+
+                            interviewRate: {
+                                $multiply: [
+                                    {
+                                        $cond: [
+                                            { $eq: ["$$this.total", 0] },
+                                            0,
+                                            { $divide: ["$$this.interviewing", "$$this.total"] }
+                                        ]
+                                    },
+                                    100
+                                ]
+                            },
+
+                            offerAcceptanceRate: {
+                                $multiply: [
+                                    {
+                                        $cond: [
+                                            { $eq: ["$$this.offered", 0] },
+                                            0,
+                                            { $divide: ["$$this.accepted", "$$this.offered"] }
+                                        ]
+                                    },
+                                    100
+                                ]
+                            }
+                        }
+                    }
+                },
 
 
             }
@@ -441,14 +382,7 @@ const analyticOverview = asyncHandler(async (req, res) => {
                 accepted: 1,
                 rejected: 1,
                 withdrawn: 1,
-                remoteJobs: 1,
-                hybridJobs: 1,
-                onSiteJobs: 1,
-                Jobs: 1,
-                Internships: 1,
-
-                // metrics (all safe: we check zero denominators)
-                status_rates: {
+                overall_status_rates: {
                     success_rate: {
                         $multiply: [
                             {
@@ -533,76 +467,78 @@ const analyticOverview = asyncHandler(async (req, res) => {
                     }
                 },
 
-                workLocationType_rates: {
-                    remotePercentage: {
-                        $multiply: [
-                            {
-                                $cond: [
-                                    { $gt: ["$totalApplications", 0] },
-                                    { $divide: ["$remoteJobs", "$totalApplications"] },
-                                    0
-                                ]
-                            },
-                            100
-                        ]
-                    },
+                // workLocationType_rates: {
+                //     remotePercentage: {
+                //         $multiply: [
+                //             {
+                //                 $cond: [
+                //                     { $gt: ["$totalApplications", 0] },
+                //                     { $divide: ["$remoteJobs", "$totalApplications"] },
+                //                     0
+                //                 ]
+                //             },
+                //             100
+                //         ]
+                //     },
 
-                    hybridPercentage: {
-                        $multiply: [
-                            {
-                                $cond: [
-                                    { $gt: ["$totalApplications", 0] },
-                                    { $divide: ["$hybridJobs", "$totalApplications"] },
-                                    0
-                                ]
-                            },
-                            100
-                        ]
-                    },
+                //     hybridPercentage: {
+                //         $multiply: [
+                //             {
+                //                 $cond: [
+                //                     { $gt: ["$totalApplications", 0] },
+                //                     { $divide: ["$hybridJobs", "$totalApplications"] },
+                //                     0
+                //                 ]
+                //             },
+                //             100
+                //         ]
+                //     },
 
-                    onSitePercentage: {
-                        $multiply: [
-                            {
-                                $cond: [
-                                    { $gt: ["$totalApplications", 0] },
-                                    { $divide: ["$onSiteJobs", "$totalApplications"] },
-                                    0
-                                ]
-                            },
-                            100
-                        ]
-                    }
-                },
+                //     onSitePercentage: {
+                //         $multiply: [
+                //             {
+                //                 $cond: [
+                //                     { $gt: ["$totalApplications", 0] },
+                //                     { $divide: ["$onSiteJobs", "$totalApplications"] },
+                //                     0
+                //                 ]
+                //             },
+                //             100
+                //         ]
+                //     }
+                // },
 
-                jobType_rates: {
-                    jobPercentage: {
-                        $multiply: [
-                            {
-                                $cond: [
-                                    { $gt: ["$totalApplications", 0] },
-                                    { $divide: ["$Jobs", "$totalApplications"] },
-                                    0
-                                ]
-                            },
-                            100
-                        ]
-                    },
+                // jobType_rates: {
+                //     jobPercentage: {
+                //         $multiply: [
+                //             {
+                //                 $cond: [
+                //                     { $gt: ["$totalApplications", 0] },
+                //                     { $divide: ["$Jobs", "$totalApplications"] },
+                //                     0
+                //                 ]
+                //             },
+                //             100
+                //         ]
+                //     },
 
-                    internshipPercentage: {
-                        $multiply: [
-                            {
-                                $cond: [
-                                    { $gt: ["$totalApplications", 0] },
-                                    { $divide: ["$Internships", "$totalApplications"] },
-                                    0
-                                ]
-                            },
-                            100
-                        ]
-                    }
-                },
+                //     internshipPercentage: {
+                //         $multiply: [
+                //             {
+                //                 $cond: [
+                //                     { $gt: ["$totalApplications", 0] },
+                //                     { $divide: ["$Internships", "$totalApplications"] },
+                //                     0
+                //                 ]
+                //             },
+                //             100
+                //         ]
+                //     }
+                // },
 
-                sources: 1
+                sources: 1,
+                workType: 1,
+                workLocationType: 1
 
             }
         }
@@ -612,6 +548,12 @@ const analyticOverview = asyncHandler(async (req, res) => {
     const result = await Application.aggregate(aggregationPipeline)
 
     console.log(result[0])
+    const performanceReport = getPerformanceReport(result[0]?.overall_status_rates.performance_rate || 0);
+    const successRateReport = getSuccessRateReport(result[0]?.overall_status_rates.success_rate || 0);
+    const appliedToInterviewReport = getAppliedToInterviewReport(result[0]?.overall_status_rates.applied_to_interview_conversion || 0);
+    const interviewToOfferReport = getInterviewToOfferReport(result[0]?.overall_status_rates.interview_to_offer_conversion || 0);
+    const offerAcceptanceReport = getOfferAcceptanceReport(result[0]?.overall_status_rates.offer_acceptance_rate || 0);
+    const rejectionRateReport = getRejectionRateReport(result[0]?.overall_status_rates.rejection_rate || 0);
 
     return res.json(
         new ApiResponse(
@@ -626,7 +568,7 @@ const analyticOverview = asyncHandler(async (req, res) => {
                     accepted: 0,
                     rejected: 0,
                     withdrawn: 0,
-                    status_rates: {
+                    overall_status_rates: {
                         success_rate: 0,
                         performance_rate: 0,
                         applied_to_interview_conversion: 0,
@@ -634,6 +576,14 @@ const analyticOverview = asyncHandler(async (req, res) => {
                         offer_acceptance_rate: 0,
                         rejection_rate: 0
                     }
+                },
+                report: {
+                    performanceReport,
+                    successRateReport,
+                    appliedToInterviewReport,
+                    interviewToOfferReport,
+                    offerAcceptanceReport,
+                    rejectionRateReport
                 }
             },
             "Analytics overview fetched successfully",
