@@ -136,7 +136,6 @@ function getAppliedToInterviewReport(conversionRate) {
     return { category, feedback };
 }
 
-
 function getInterviewToOfferReport(conversionRate) {
     let category = "";
     let feedback = "";
@@ -276,15 +275,297 @@ function getRejectionRateReport(rejectionRate) {
 }
 
 
+function getWorkTypeReport(workTypeMetrics = []) {
+    return workTypeMetrics.map((item) => {
+        const interviewLevel = classifyRate(item.interviewRate);
+        const offerLevel = classifyRate(item.offerRate);
+        const acceptanceLevel = classifyRate(item.offerAcceptanceRate);
+
+        return {
+            workType: item.workType,
+
+            summary: {
+                interviewRate: item.interviewRate,
+                offerRate: item.offerRate,
+                offerAcceptanceRate: item.offerAcceptanceRate,
+            },
+
+            insights: [
+                WORK_TYPE_INSIGHTS.interviewInsight(interviewLevel),
+                WORK_TYPE_INSIGHTS.offerInsight(offerLevel),
+                WORK_TYPE_INSIGHTS.acceptanceInsight(acceptanceLevel)
+            ],
+
+            levels: {
+                interviewPerformance: interviewLevel,
+                offerPerformance: offerLevel,
+                acceptancePerformance: acceptanceLevel
+            }
+        };
+    });
+}
+
+const WORK_TYPE_INSIGHTS = {
+    interviewInsight: (level) => {
+        switch (level) {
+            case "Very Weak":
+            case "Weak":
+                return "Your resume is not converting into interviews. Improve ATS optimization and role targeting.";
+            case "Average":
+                return "Your resume is partially effective. Refining keywords and experience presentation can help.";
+            default:
+                return "Your resume performs well and consistently attracts interviews.";
+        }
+    },
+    offerInsight: (level) => {
+        switch (level) {
+            case "Very Weak":
+            case "Weak":
+                return "Interviews are not converting into offers. Interview preparation needs improvement.";
+            case "Average":
+                return "Some interviews convert to offers. More structured preparation can improve results.";
+            default:
+                return "Strong interview performance. You convert interviews effectively.";
+        }
+    },
+    acceptanceInsight: (level) => {
+        switch (level) {
+            case "Very Weak":
+            case "Weak":
+                return "Offers are frequently declined. Re-evaluate role expectations and filtering criteria.";
+            default:
+                return "Offer decisions are aligned with your expectations.";
+        }
+    }
+};
+
+function getWorkLocationReport(workLocationMetrics = []) {
+    if (!workLocationMetrics.length) return [];
+
+    return workLocationMetrics.map((location) => {
+        const locationType = location.workLocationType;
+
+        const interviewLevel = classifyRate(location.interviewRate || 0);
+        const offerLevel = classifyRate(location.offerRate || 0);
+        const acceptanceLevel = classifyRate(location.offerAcceptanceRate || 0);
+
+        return {
+            workLocationType: locationType,
+
+            insights: [
+                WORK_LOCATION_INSIGHTS.interviewInsight(interviewLevel, locationType),
+                WORK_LOCATION_INSIGHTS.offerInsight(offerLevel, locationType),
+                WORK_LOCATION_INSIGHTS.acceptanceInsight(acceptanceLevel, locationType)
+            ],
+
+            levels: {
+                interview: interviewLevel,
+                offer: offerLevel,
+                acceptance: acceptanceLevel
+            },
+        };
+    });
+}
+
+const WORK_LOCATION_INSIGHTS = {
+    interviewInsight: (level, locationType) => {
+        switch (level) {
+            case "Very Weak":
+            case "Weak":
+                return `Your ${locationType} applications rarely convert into interviews. This suggests resume mismatch or lower competitiveness for ${locationType} roles. Improve role targeting and location-specific skills.`;
+
+            case "Average":
+                return `Your ${locationType} applications get some interview traction. Refining keywords and highlighting relevant experience can improve results.`;
+
+            default:
+                return `Your resume performs well for ${locationType} roles and consistently attracts interviews.`;
+        }
+    },
+
+    offerInsight: (level, locationType) => {
+        switch (level) {
+            case "Very Weak":
+            case "Weak":
+                return `Interviews for ${locationType} roles are not converting into offers. Focus on interview preparation, communication, and expectation alignment.`;
+
+            case "Average":
+                return `Some ${locationType} interviews convert into offers. More structured interview preparation could improve outcomes.`;
+
+            default:
+                return `Strong interview performance for ${locationType} roles. You convert interviews effectively.`;
+        }
+    },
+
+    acceptanceInsight: (level, locationType) => {
+        switch (level) {
+            case "Very Weak":
+            case "Weak":
+                return `Offers for ${locationType} roles are frequently declined. This suggests a mismatch in compensation, flexibility, or location expectations. Re-evaluate your criteria.`;
+
+            default:
+                return `Your offer acceptance for ${locationType} roles aligns well with your expectations.`;
+        }
+    }
+};
+
+
+function getSourceReport(sourceMetrics = []) {
+
+    return sourceMetrics.map((source) => {
+
+        const interviewRate = source.interviewRate || 0;
+        const offerRate = source.offerRate || 0;
+        const acceptanceRate = source.offerAcceptanceRate || 0;
+
+        const interviewLevel = classifyRate(interviewRate);
+        const offerLevel = classifyRate(offerRate);
+        const acceptanceLevel = classifyRate(acceptanceRate);
+
+        const { category, recommendation } = getSourceCategory({
+            interview: interviewRate,
+            offer: offerRate,
+            acceptance: acceptanceRate,
+            total: source.total
+        });
+
+        return {
+            source: source.source,
+
+            metrics: {
+                interviewRate,
+                offerRate,
+                acceptanceRate
+            },
+
+            levels: {
+                interview: interviewLevel,
+                offer: offerLevel,
+                acceptance: acceptanceLevel
+            },
+
+            category,
+
+            insights: [
+                SOURCE_INSIGHTS.interview(interviewLevel),
+                SOURCE_INSIGHTS.offer(offerLevel),
+                SOURCE_INSIGHTS.acceptance(acceptanceLevel)
+            ],
+
+            recommendation
+        };
+    });
+}
+
+
+function classifyRate(rate) {
+    if (rate <= 10) return "Very Weak";
+    if (rate <= 25) return "Weak";
+    if (rate <= 40) return "Average";
+    if (rate <= 60) return "Good";
+    if (rate <= 80) return "Strong";
+    return "Excellent";
+}
+
+function getSourceCategory({ interview, offer, acceptance, total }) {
+
+    if (total < 5) {
+        return {
+            category: "Insufficient Data",
+            recommendation: "Apply more through this source before drawing conclusions."
+        };
+    }
+
+    if (interview >= 41 && offer >= 41 && acceptance >= 26) {
+        return {
+            category: "High-Quality Source",
+            recommendation: "Prioritize quality applications from this source."
+        };
+    }
+
+    if (interview >= 41 && offer <= 40) {
+        return {
+            category: "High Reach, Low Conversion",
+            recommendation: "Maintain presence but focus on improving interview performance."
+        };
+    }
+
+    if (offer >= 41 && acceptance <= 25) {
+        return {
+            category: "Offer Mismatch Source",
+            recommendation: "Apply selectively and refine role expectations."
+        };
+    }
+
+    if (interview <= 25 && offer <= 25) {
+        return {
+            category: "Low Yield Source",
+            recommendation: "Consider reducing application volume from this source."
+        };
+    }
+
+    return {
+        category: "Mixed Performance",
+        recommendation: "Monitor results and adjust strategy as needed."
+    };
+}
+
+
+const SOURCE_INSIGHTS = {
+    interview: (level) => {
+        switch (level) {
+            case "Very Weak":
+            case "Weak":
+                return "Applications from this source rarely convert into interviews. Resume alignment or role targeting may need improvement.";
+            case "Average":
+                return "Some applications reach interviews, but targeting and resume tailoring could be improved.";
+            default:
+                return "Your profile resonates well on this platform and consistently attracts interviews.";
+        }
+    },
+
+    offer: (level) => {
+        switch (level) {
+            case "Very Weak":
+            case "Weak":
+                return "Interviews from this source rarely convert into offers. Interview preparation may need improvement.";
+            case "Average":
+                return "Some interviews convert into offers. Structured interview preparation could improve results.";
+            default:
+                return "You convert interviews into offers effectively on this platform.";
+        }
+    },
+
+    acceptance: (level) => {
+        switch (level) {
+            case "Very Weak":
+            case "Weak":
+                return "Offers from this source are often declined, suggesting a mismatch in expectations or role selection.";
+            case "Average":
+                return "Offer acceptance is moderate. Refining role filters may help.";
+            default:
+                return "Offers from this source align well with your expectations.";
+        }
+    }
+};
 
 
 
-export { 
+
+
+
+
+
+
+
+export {
     getPerformanceReport,
     getSuccessRateReport,
     getAppliedToInterviewReport,
     getInterviewToOfferReport,
     getOfferAcceptanceReport,
-    getRejectionRateReport
+    getRejectionRateReport,
+    getWorkTypeReport,
+    getWorkLocationReport,
+    getSourceReport
 
- };
+};

@@ -2,7 +2,7 @@ import { asyncHandler } from '../utils/AsyncHandler.utils.js'
 import { ApiError } from '../utils/ApiError.utils.js'
 import { ApiResponse } from '../utils/ApiResponse.utils.js'
 import getStartDateForRange from '../utils/DateRange.utils.js'
-import { getPerformanceReport, getSuccessRateReport, getAppliedToInterviewReport, getInterviewToOfferReport, getOfferAcceptanceReport, getRejectionRateReport } from '../utils/AnalyticsReports.utils.js'
+import { getPerformanceReport, getSuccessRateReport, getAppliedToInterviewReport, getInterviewToOfferReport, getOfferAcceptanceReport, getRejectionRateReport, getWorkTypeReport, getWorkLocationReport, getSourceReport } from '../utils/AnalyticsReports.utils.js'
 
 import Application from '../models/application.model.js'
 import mongoose from 'mongoose'
@@ -554,6 +554,9 @@ const analyticOverview = asyncHandler(async (req, res) => {
     const interviewToOfferReport = getInterviewToOfferReport(result[0]?.overall_status_rates.interview_to_offer_conversion || 0);
     const offerAcceptanceReport = getOfferAcceptanceReport(result[0]?.overall_status_rates.offer_acceptance_rate || 0);
     const rejectionRateReport = getRejectionRateReport(result[0]?.overall_status_rates.rejection_rate || 0);
+    const workTypeReport = getWorkTypeReport(result[0]?.workType || []);
+    const workLocationReport = getWorkLocationReport(result[0]?.workLocationType || []);
+    const sourceReport = getSourceReport(result[0]?.sources || []);
 
     return res.json(
         new ApiResponse(
@@ -578,16 +581,22 @@ const analyticOverview = asyncHandler(async (req, res) => {
                     }
                 },
                 report: {
-                    performanceReport,
-                    successRateReport,
-                    appliedToInterviewReport,
-                    interviewToOfferReport,
-                    offerAcceptanceReport,
-                    rejectionRateReport
-                }
+                    overall_status_report: {
+                        performanceReport,
+                        successRateReport,
+                        appliedToInterviewReport,
+                        interviewToOfferReport,
+                        offerAcceptanceReport,
+                        rejectionRateReport
+                    },
+                    workTypeReport,
+                    workLocationReport,
+                    sourceReport
+                },
             },
             "Analytics overview fetched successfully",
         )
+
     )
 
 })
