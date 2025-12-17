@@ -171,54 +171,74 @@ const analyticOverview = asyncHandler(async (req, res) => {
                             applied: "$$this.applied",
 
                             successRate: {
-                                $multiply: [
+                                $round: [
                                     {
-                                        $cond: [
-                                            { $eq: ["$$this.total", 0] },
-                                            0,
-                                            { $divide: ["$$this.accepted", "$$this.total"] }
+                                        $multiply: [
+                                            {
+                                                $cond: [
+                                                    { $eq: ["$$this.total", 0] },
+                                                    0,
+                                                    { $divide: ["$$this.accepted", "$$this.total"] }
+                                                ]
+                                            },
+                                            100
                                         ]
                                     },
-                                    100
+                                    1
                                 ]
                             },
 
                             offerRate: {
-                                $multiply: [
+                                $round: [
                                     {
-                                        $cond: [
-                                            { $eq: ["$$this.total", 0] },
-                                            0,
-                                            { $divide: ["$$this.offered", "$$this.total"] }
+                                        $multiply: [
+                                            {
+                                                $cond: [
+                                                    { $eq: ["$$this.total", 0] },
+                                                    0,
+                                                    { $divide: ["$$this.offered", "$$this.total"] }
+                                                ]
+                                            },
+                                            100
                                         ]
                                     },
-                                    100
+                                    1
                                 ]
                             },
 
                             interviewRate: {
-                                $multiply: [
+                                $round: [
                                     {
-                                        $cond: [
-                                            { $eq: ["$$this.total", 0] },
-                                            0,
-                                            { $divide: ["$$this.interviewing", "$$this.total"] }
+                                        $multiply: [
+                                            {
+                                                $cond: [
+                                                    { $eq: ["$$this.total", 0] },
+                                                    0,
+                                                    { $divide: ["$$this.interviewing", "$$this.total"] }
+                                                ]
+                                            },
+                                            100
                                         ]
                                     },
-                                    100
+                                    1
                                 ]
                             },
 
                             offerAcceptanceRate: {
-                                $multiply: [
+                                $round: [
                                     {
-                                        $cond: [
-                                            { $eq: ["$$this.offered", 0] },
-                                            0,
-                                            { $divide: ["$$this.accepted", "$$this.offered"] }
+                                        $multiply: [
+                                            {
+                                                $cond: [
+                                                    { $eq: ["$$this.offered", 0] },
+                                                    0,
+                                                    { $divide: ["$$this.accepted", "$$this.offered"] }
+                                                ]
+                                            },
+                                            100
                                         ]
                                     },
-                                    100
+                                    1
                                 ]
                             },
 
@@ -242,67 +262,92 @@ const analyticOverview = asyncHandler(async (req, res) => {
                             applied: "$$this.applied",
 
                             workTypePercentage: {
-                                $multiply: [
+                                $round: [
                                     {
-                                        $cond: [
-                                            { $eq: [{ $sum: "$statusMetrics.count" }, 0] },
-                                            0,
-                                            { $divide: ["$$this.total", { $sum: "$statusMetrics.count" }] }
+                                        $multiply: [
+                                            {
+                                                $cond: [
+                                                    { $eq: [{ $sum: "$statusMetrics.count" }, 0] },
+                                                    0,
+                                                    { $divide: ["$$this.total", { $sum: "$statusMetrics.count" }] }
+                                                ]
+                                            },
+                                            100
                                         ]
                                     },
-                                    100
+                                    1
                                 ]
                             },
 
                             successRate: {
-                                $multiply: [
+                                $round: [
                                     {
-                                        $cond: [
-                                            { $eq: ["$$this.total", 0] },
-                                            0,
-                                            { $divide: ["$$this.accepted", "$$this.total"] }
+                                        $multiply: [
+                                            {
+                                                $cond: [
+                                                    { $eq: ["$$this.total", 0] },
+                                                    0,
+                                                    { $divide: ["$$this.accepted", "$$this.total"] }
+                                                ]
+                                            },
+                                            100
                                         ]
                                     },
-                                    100
+                                    1
                                 ]
                             },
 
                             offerRate: {
-                                $multiply: [
+                                $round: [
                                     {
-                                        $cond: [
-                                            { $eq: ["$$this.total", 0] },
-                                            0,
-                                            { $divide: ["$$this.offered", "$$this.total"] }
+                                        $multiply: [
+                                            {
+                                                $cond: [
+                                                    { $eq: ["$$this.total", 0] },
+                                                    0,
+                                                    { $divide: ["$$this.offered", "$$this.total"] }
+                                                ]
+                                            },
+                                            100
                                         ]
                                     },
-                                    100
+                                    1
                                 ]
                             },
 
                             interviewRate: {
-                                $multiply: [
+                                $round: [
                                     {
-                                        $cond: [
-                                            { $eq: ["$$this.total", 0] },
-                                            0,
-                                            { $divide: ["$$this.interviewing", "$$this.total"] }
+                                        $multiply: [
+                                            {
+                                                $cond: [
+                                                    { $eq: ["$$this.total", 0] },
+                                                    0,
+                                                    { $divide: ["$$this.interviewing", "$$this.total"] }
+                                                ]
+                                            },
+                                            100
                                         ]
                                     },
-                                    100
+                                    1
                                 ]
                             },
 
                             offerAcceptanceRate: {
-                                $multiply: [
+                                $round: [
                                     {
-                                        $cond: [
-                                            { $eq: ["$$this.offered", 0] },
-                                            0,
-                                            { $divide: ["$$this.accepted", "$$this.offered"] }
+                                        $multiply: [
+                                            {
+                                                $cond: [
+                                                    { $eq: ["$$this.offered", 0] },
+                                                    0,
+                                                    { $divide: ["$$this.accepted", "$$this.offered"] }
+                                                ]
+                                            },
+                                            100
                                         ]
                                     },
-                                    100
+                                    1
                                 ]
                             }
                         }
@@ -323,66 +368,91 @@ const analyticOverview = asyncHandler(async (req, res) => {
                             rejected: "$$this.rejected",
                             applied: "$$this.applied",
                             workLocationTypePercentage: {
-                                $multiply: [
+                                $round: [
                                     {
-                                        $cond: [
-                                            { $eq: [{ $sum: "$statusMetrics.count" }, 0] },
-                                            0,
-                                            { $divide: ["$$this.total", { $sum: "$statusMetrics.count" }] }
+                                        $multiply: [
+                                            {
+                                                $cond: [
+                                                    { $eq: [{ $sum: "$statusMetrics.count" }, 0] },
+                                                    0,
+                                                    { $divide: ["$$this.total", { $sum: "$statusMetrics.count" }] }
+                                                ]
+                                            },
+                                            100
                                         ]
                                     },
-                                    100
+                                    1
                                 ]
                             },
                             successRate: {
-                                $multiply: [
+                                $round: [
                                     {
-                                        $cond: [
-                                            { $eq: ["$$this.total", 0] },
-                                            0,
-                                            { $divide: ["$$this.accepted", "$$this.total"] }
+                                        $multiply: [
+                                            {
+                                                $cond: [
+                                                    { $eq: ["$$this.total", 0] },
+                                                    0,
+                                                    { $divide: ["$$this.accepted", "$$this.total"] }
+                                                ]
+                                            },
+                                            100
                                         ]
                                     },
-                                    100
+                                    1
                                 ]
                             },
 
                             offerRate: {
-                                $multiply: [
+                                $round: [
                                     {
-                                        $cond: [
-                                            { $eq: ["$$this.total", 0] },
-                                            0,
-                                            { $divide: ["$$this.offered", "$$this.total"] }
+                                        $multiply: [
+                                            {
+                                                $cond: [
+                                                    { $eq: ["$$this.total", 0] },
+                                                    0,
+                                                    { $divide: ["$$this.offered", "$$this.total"] }
+                                                ]
+                                            },
+                                            100
                                         ]
                                     },
-                                    100
+                                    1
                                 ]
                             },
 
                             interviewRate: {
-                                $multiply: [
+                                $round: [
                                     {
-                                        $cond: [
-                                            { $eq: ["$$this.total", 0] },
-                                            0,
-                                            { $divide: ["$$this.interviewing", "$$this.total"] }
+                                        $multiply: [
+                                            {
+                                                $cond: [
+                                                    { $eq: ["$$this.total", 0] },
+                                                    0,
+                                                    { $divide: ["$$this.interviewing", "$$this.total"] }
+                                                ]
+                                            },
+                                            100
                                         ]
                                     },
-                                    100
+                                    1
                                 ]
                             },
 
                             offerAcceptanceRate: {
-                                $multiply: [
+                                $round: [
                                     {
-                                        $cond: [
-                                            { $eq: ["$$this.offered", 0] },
-                                            0,
-                                            { $divide: ["$$this.accepted", "$$this.offered"] }
+                                        $multiply: [
+                                            {
+                                                $cond: [
+                                                    { $eq: ["$$this.offered", 0] },
+                                                    0,
+                                                    { $divide: ["$$this.accepted", "$$this.offered"] }
+                                                ]
+                                            },
+                                            100
                                         ]
                                     },
-                                    100
+                                    1
                                 ]
                             }
                         }
@@ -408,158 +478,118 @@ const analyticOverview = asyncHandler(async (req, res) => {
                 withdrawn: 1,
                 overall_status_rates: {
                     success_rate: {
-                        $multiply: [
+                        $round: [
                             {
-                                $cond: [
-                                    { $eq: ["$totalApplications", 0] },
-                                    0,
-                                    { $divide: ["$accepted", "$totalApplications"] }
+                                $multiply: [
+                                    {
+                                        $cond: [
+                                            { $eq: ["$totalApplications", 0] },
+                                            0,
+                                            { $divide: ["$accepted", "$totalApplications"] }
+                                        ]
+                                    },
+                                    100
                                 ]
                             },
-                            100
+                            1
                         ]
                     },
 
                     performance_rate: {
-                        $multiply: [
+                        $round: [
                             {
-                                $cond: [
-                                    { $eq: ["$totalApplications", 0] },
-                                    0,
+                                $multiply: [
                                     {
-                                        $divide: [
-                                            { $add: ["$accepted", "$offered"] },
-                                            "$totalApplications"
+                                        $cond: [
+                                            { $eq: ["$totalApplications", 0] },
+                                            0,
+                                            {
+                                                $divide: [
+                                                    { $add: ["$accepted", "$offered"] },
+                                                    "$totalApplications"
+                                                ]
+                                            }
                                         ]
-                                    }
+                                    },
+                                    100
                                 ]
                             },
-                            100
+                            1
                         ]
                     },
 
                     applied_to_interview_conversion: {
-                        $multiply: [
+                        $round: [
                             {
-                                $cond: [
-                                    { $eq: ["$applied", 0] },
-                                    0,
-                                    { $divide: ["$interviewing", "$applied"] }
+                                $multiply: [
+                                    {
+                                        $cond: [
+                                            { $eq: ["$applied", 0] },
+                                            0,
+                                            { $divide: ["$interviewing", "$applied"] }
+                                        ]
+                                    },
+                                    100
                                 ]
                             },
-                            100
+                            1
                         ]
                     },
 
                     interview_to_offer_conversion: {
-                        $multiply: [
+                        $round: [
                             {
-                                $cond: [
-                                    { $eq: ["$interviewing", 0] },
-                                    0,
-                                    { $divide: ["$offered", "$interviewing"] }
+                                $multiply: [
+                                    {
+                                        $cond: [
+                                            { $eq: ["$interviewing", 0] },
+                                            0,
+                                            { $divide: ["$offered", "$interviewing"] }
+                                        ]
+                                    },
+                                    100
                                 ]
                             },
-                            100
+                            1
                         ]
                     },
 
                     offer_acceptance_rate: {
-                        $multiply: [
+                        $round: [
                             {
-                                $cond: [
-                                    { $eq: ["$offered", 0] },
-                                    0,
-                                    { $divide: ["$accepted", "$offered"] }
+                                $multiply: [
+                                    {
+                                        $cond: [
+                                            { $eq: ["$offered", 0] },
+                                            0,
+                                            { $divide: ["$accepted", "$offered"] }
+                                        ]
+                                    },
+                                    100
                                 ]
                             },
-                            100
+                            1
                         ]
                     },
 
                     rejection_rate: {
-                        $multiply: [
+                        $round: [
                             {
-                                $cond: [
-                                    { $eq: ["$applied", 0] },
-                                    0,
-                                    { $divide: ["$rejected", "$applied"] }
+                                $multiply: [
+                                    {
+                                        $cond: [
+                                            { $eq: ["$applied", 0] },
+                                            0,
+                                            { $divide: ["$rejected", "$applied"] }
+                                        ]
+                                    },
+                                    100
                                 ]
                             },
-                            100
+                            1
                         ]
                     }
                 },
-
-                // workLocationType_rates: {
-                //     remotePercentage: {
-                //         $multiply: [
-                //             {
-                //                 $cond: [
-                //                     { $gt: ["$totalApplications", 0] },
-                //                     { $divide: ["$remoteJobs", "$totalApplications"] },
-                //                     0
-                //                 ]
-                //             },
-                //             100
-                //         ]
-                //     },
-
-                //     hybridPercentage: {
-                //         $multiply: [
-                //             {
-                //                 $cond: [
-                //                     { $gt: ["$totalApplications", 0] },
-                //                     { $divide: ["$hybridJobs", "$totalApplications"] },
-                //                     0
-                //                 ]
-                //             },
-                //             100
-                //         ]
-                //     },
-
-                //     onSitePercentage: {
-                //         $multiply: [
-                //             {
-                //                 $cond: [
-                //                     { $gt: ["$totalApplications", 0] },
-                //                     { $divide: ["$onSiteJobs", "$totalApplications"] },
-                //                     0
-                //                 ]
-                //             },
-                //             100
-                //         ]
-                //     }
-                // },
-
-                // jobType_rates: {
-                //     jobPercentage: {
-                //         $multiply: [
-                //             {
-                //                 $cond: [
-                //                     { $gt: ["$totalApplications", 0] },
-                //                     { $divide: ["$Jobs", "$totalApplications"] },
-                //                     0
-                //                 ]
-                //             },
-                //             100
-                //         ]
-                //     },
-
-                //     internshipPercentage: {
-                //         $multiply: [
-                //             {
-                //                 $cond: [
-                //                     { $gt: ["$totalApplications", 0] },
-                //                     { $divide: ["$Internships", "$totalApplications"] },
-                //                     0
-                //                 ]
-                //             },
-                //             100
-                //         ]
-                //     }
-                // },
-
                 sources: 1,
                 workType: 1,
                 workLocationType: 1
@@ -571,7 +601,7 @@ const analyticOverview = asyncHandler(async (req, res) => {
 
     const result = await Application.aggregate(aggregationPipeline)
 
-    //console.log(result[0])
+    console.log(result[0])
     const performanceReport = getPerformanceReport(result[0]?.overall_status_rates.performance_rate || 0);
     const successRateReport = getSuccessRateReport(result[0]?.overall_status_rates.success_rate || 0);
     const appliedToInterviewReport = getAppliedToInterviewReport(result[0]?.overall_status_rates.applied_to_interview_conversion || 0);
