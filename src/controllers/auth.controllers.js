@@ -71,7 +71,7 @@ const registerUser = asyncHandler(async (req, res) => {
         subject: "Email Verification",
         mailgenContent: emailVerificationMailGen(
             user.fullname,
-            `http://localhost:5173/user/${userId}/verify-email/${hashedToken}`
+            `https://joblytics-five.vercel.app/user/${userId}/verify-email/${hashedToken}`
         )
     }
     sendMail(mailOptions)
@@ -179,12 +179,12 @@ const resendEmailVerification = asyncHandler(async (req, res) => {
     const userId = req.user._id.toString()
 
     const mailOptions = {
-        from: "jobHunt@gmail.com",
+        from: `${process.env.MAIL_FROM_NAME} <${process.env.MAIL_FROM_EMAIL}>`,
         to: req.user.email,
         subject: "Verify Your Email",
         mailgenContent: emailVerificationMailGen(
             req.user.fullname,
-            `http://localhost:5173/user/${userId}/verify-email/${hashedToken}`
+            `https://joblytics-five.vercel.app/user/${userId}/verify-email/${hashedToken}`
         )
     }
 
@@ -211,12 +211,12 @@ const forgotPasswordRequest = asyncHandler(async (req, res) => {
     await user.save({ validateBeforeSave: false })
 
     const mailOptions = {
-        from: "jobHunt@gmail.com",
+        from: `${process.env.MAIL_FROM_NAME} <${process.env.MAIL_FROM_EMAIL}>`,
         to: user.email,
         subject: "Reset Your Password",
         mailgenContent: forgotPasswordReqMailGen(
             user.fullname,
-            `http://localhost:5173/user/${hashedToken}/reset-forgot-password`
+            `https://joblytics-five.vercel.app/user/${hashedToken}/reset-forgot-password`
         )
     }
 
@@ -332,12 +332,12 @@ const updateUser = asyncHandler(async (req, res) => {
         await user.save({ validateBeforeSave: false })
         const userId = user._id.toString()
         const mailOptions = {
-            from: "jobHunt@gmail.com",
+            from: `${process.env.MAIL_FROM_NAME} <${process.env.MAIL_FROM_EMAIL}>`,
             to: user.email,
             subject: "Verify Your Email",
             mailgenContent: emailVerificationMailGen(
                 user.fullname,
-                `http://localhost:5173/user/${userId}/verify-email/${hashedToken}`
+                `https://joblytics-five.vercel.app/user/${userId}/verify-email/${hashedToken}`
             )
         }
         sendMail(mailOptions)
