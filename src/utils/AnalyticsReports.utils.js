@@ -285,6 +285,7 @@ function getWorkTypeReport(workTypeMetrics = []) {
             workType: item.workType,
 
             summary: {
+                totalApplications: item.total,
                 interviewRate: item.interviewRate,
                 offerRate: item.offerRate,
                 offerAcceptanceRate: item.offerAcceptanceRate,
@@ -352,6 +353,13 @@ function getWorkLocationReport(workLocationMetrics = []) {
         return {
             workLocationType: locationType,
 
+            summary: {
+                totalApplications: location.total || 0,
+                interviewRate: location.interviewRate || 0,
+                offerRate: location.offerRate || 0,
+                offerAcceptanceRate: location.offerAcceptanceRate || 0,
+            },
+
             insights: [
                 WORK_LOCATION_INSIGHTS.interviewInsight(interviewLevel, locationType),
                 WORK_LOCATION_INSIGHTS.offerInsight(offerLevel, locationType),
@@ -413,6 +421,7 @@ function getSourceReport(sourceMetrics = []) {
 
     return sourceMetrics.map((source) => {
 
+        const totalApplications = source.total || 0;
         const interviewRate = source.interviewRate || 0;
         const offerRate = source.offerRate || 0;
         const acceptanceRate = source.offerAcceptanceRate || 0;
@@ -428,14 +437,17 @@ function getSourceReport(sourceMetrics = []) {
             total: source.total
         });
 
+        const summary = {
+            totalApplications,
+            interviewRate,
+            offerRate,
+            acceptanceRate
+        };
+
         return {
             source: source.source,
 
-            metrics: {
-                interviewRate,
-                offerRate,
-                acceptanceRate
-            },
+            summary,
 
             levels: {
                 interview: interviewLevel,
@@ -468,7 +480,7 @@ function classifyRate(rate) {
 
 function getSourceCategory({ interview, offer, acceptance, total }) {
 
-    if (total < 5) {
+    if (total < 2) {
         return {
             category: "Insufficient Data",
             recommendation: "Apply more through this source before drawing conclusions."

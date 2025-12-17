@@ -44,7 +44,7 @@ const analyticOverview = asyncHandler(async (req, res) => {
                 sourceMetrics: [
                     {
                         $group: {
-                            _id: "$source",
+                            _id: "$normalizedSource",
                             total: { $sum: 1 },
 
                             offered: {
@@ -241,6 +241,19 @@ const analyticOverview = asyncHandler(async (req, res) => {
                             rejected: "$$this.rejected",
                             applied: "$$this.applied",
 
+                            workTypePercentage: {
+                                $multiply: [
+                                    {
+                                        $cond: [
+                                            { $eq: [{ $sum: "$statusMetrics.count" }, 0] },
+                                            0,
+                                            { $divide: ["$$this.total", { $sum: "$statusMetrics.count" }] }
+                                        ]
+                                    },
+                                    100
+                                ]
+                            },
+
                             successRate: {
                                 $multiply: [
                                     {
@@ -309,7 +322,18 @@ const analyticOverview = asyncHandler(async (req, res) => {
                             interviewing: "$$this.interviewing",
                             rejected: "$$this.rejected",
                             applied: "$$this.applied",
-
+                            workLocationTypePercentage: {
+                                $multiply: [
+                                    {
+                                        $cond: [
+                                            { $eq: [{ $sum: "$statusMetrics.count" }, 0] },
+                                            0,
+                                            { $divide: ["$$this.total", { $sum: "$statusMetrics.count" }] }
+                                        ]
+                                    },
+                                    100
+                                ]
+                            },
                             successRate: {
                                 $multiply: [
                                     {
@@ -547,7 +571,7 @@ const analyticOverview = asyncHandler(async (req, res) => {
 
     const result = await Application.aggregate(aggregationPipeline)
 
-    console.log(result[0])
+    //console.log(result[0])
     const performanceReport = getPerformanceReport(result[0]?.overall_status_rates.performance_rate || 0);
     const successRateReport = getSuccessRateReport(result[0]?.overall_status_rates.success_rate || 0);
     const appliedToInterviewReport = getAppliedToInterviewReport(result[0]?.overall_status_rates.applied_to_interview_conversion || 0);

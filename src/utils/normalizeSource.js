@@ -15,6 +15,7 @@ export function normalizeSource(raw) {
     return "Company Website";
   }
 
+  //console.log(src.charAt(0).toUpperCase() + src.slice(1))
   // ---- FALLBACK: Title Case the raw source ----
   return src.charAt(0).toUpperCase() + src.slice(1);
 }
