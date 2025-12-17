@@ -66,7 +66,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
     const userId = user._id.toString()
     const mailOptions = {
-        from: "jobHunt@gmail.com",
+        from: `${process.env.MAIL_FROM_NAME} <${process.env.MAIL_FROM_EMAIL}>`,
         to: user.email,
         subject: "Email Verification",
         mailgenContent: emailVerificationMailGen(

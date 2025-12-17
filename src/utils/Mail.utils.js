@@ -1,83 +1,80 @@
 import Mailgen from 'mailgen'
-import nodemailer from 'nodemailer'
+import { Resend } from 'resend'
 
+const resend = new Resend(process.env.RESEND_API_KEY)
 
 const sendMail = async (options) => {
     const mailGenerator = new Mailgen({
         theme: 'default',
         product: {
-            name: 'App assistant',
-            link: 'https://mailgen.js/'
+            name: process.env.MAIL_PRODUCT_NAME,
+            link: process.env.MAIL_PRODUCT_URL
         }
-    });
+    })
 
-    const emailHtml = mailGenerator.generate(options.mailgenContent);
-    const emailText = mailGenerator.generatePlaintext(options.mailgenContent);
-
-    const transporter = nodemailer.createTransport({
-        host: process.env.MAILTRAP_SMTP_HOST,
-        port: process.env.MAILTRAP_SMTP_PORT,
-        secure: false, // true for 465, false for other ports
-        auth: {
-            user: process.env.MAILTRAP_SMTP_USER,
-            pass: process.env.MAILTRAP_SMTP_PASS,
-        },
-    });
+    const emailHtml = mailGenerator.generate(options.mailgenContent)
+    const emailText = mailGenerator.generatePlaintext(options.mailgenContent)
 
     const mail = {
-        from: options.from,
+        from: options.from || `${process.env.MAIL_FROM_NAME} <${process.env.MAIL_FROM_EMAIL}>`,
         to: options.to,
         subject: options.subject,
-        text: emailText, // plain‑text body
-        html: emailHtml, // HTML body
+        text: emailText,
+        html: emailHtml
     }
 
     try {
-        await transporter.sendMail(mail);
+        
+
+        const { data, error } = await resend.emails.send(mail)
+
+        if (error) {
+            console.error('Email sending failed:', error)
+            return { success: false, error }
+        }
+
+        return { success: true, data }
+
     } catch (error) {
-        console.error(
-            "Email service failed silently. Make sure you have provided your MAILTRAP credentials in the .env file",
-        );
-        console.error("Error: ", error);
+        console.error('Resend email service failed:', error)
+        return { success: false, error }
     }
 }
 
 
-const emailVerificationMailGen = (fullname, verificationUrl) => {
-    return {
-        body: {
-            name: fullname,
-            intro: 'Welcome to Brickly! We\'re very excited to have you on app.',
-            action: {
-                instructions: 'To get your email verified , please click here:',
-                button: {
-                    color: '#22BC66', // Optional action button color
-                    text: 'Verify Your Email',
-                    link: verificationUrl
-                }
-            },
-            outro: 'Need help, or have questions? Just reply to this email, we\'d love to help.'
-        }
-    }
-};
+const emailVerificationMailGen = (fullname, verificationUrl) => ({
+  body: {
+    name: fullname,
+    intro: "Welcome to Joblytics! We're excited to help you track and analyze your job applications.",
+    action: {
+      instructions: 'Please verify your email address to get started:',
+      button: {
+        color: '#2563EB', // Joblytics blue
+        text: 'Verify Email',
+        link: verificationUrl
+      }
+    },
+    outro: 'If you did not sign up for Joblytics, you can safely ignore this email.'
+  }
+})
 
-const forgotPasswordReqMailGen = (fullname,  forgotPasswordUrl) => {
- return {
-        body: {
-            name: fullname,
-            intro: 'You are receiving this email because we received a password reset request for your account.',
-            action: {
-                instructions: 'To reset the password, please click here:',
-                button: {
-                    color: '#22BC66', 
-                    text: 'Reset Password',
-                    link: forgotPasswordUrl
-                }
-            },
-            outro: 'If you did not request a password reset, no further action is required.'
-        }
-    }
-};
+
+const forgotPasswordReqMailGen = (fullname, resetUrl) => ({
+  body: {
+    name: fullname,
+    intro: 'We received a request to reset your Joblytics password.',
+    action: {
+      instructions: 'Click the button below to reset your password:',
+      button: {
+        color: '#2563EB',
+        text: 'Reset Password',
+        link: resetUrl
+      }
+    },
+    outro: 'If you did not request this password reset, no action is required.'
+  }
+})
+
 
 export {
     sendMail,

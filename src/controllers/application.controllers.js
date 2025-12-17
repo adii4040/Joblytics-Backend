@@ -77,7 +77,14 @@ const getUsersApplications = asyncHandler(async (req, res) => {
 
     const applications = await Application.find({ userId: user._id }).sort({ createdAt: -1 }) // Sort by appliedDate in descending order
 
-    if (!applications.length) throw new ApiError(404, `No applications found for ${user.fullname}`)
+    if (!applications.length) {
+        return res.status(200).json(
+            new ApiResponse(
+                200,
+                { applications: [] },
+                `No applications found for ${user.fullname}`,
+            ))
+    }
 
     res.status(200).json(
         new ApiResponse(
