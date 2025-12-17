@@ -36,5 +36,6 @@ export const SalaryCurrencyArray = Object.values(SalaryCurrencyEnum);
 
 export const cookieOption = {
     httpOnly: true,
-    secure: true
+    secure: true,
+    sameSite: 'none',
 }

@@ -6,14 +6,20 @@ import cors from 'cors'
 const app = express()
 
 
+import cors from 'cors';
+
 app.use(cors({
   origin: [
-    "https://joblytics-five.vercel.app/",
-    "http://localhost:5173"
+    'http://localhost:5173',
+    'https://joblytics-five.vercel.app'
   ],
-  methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   credentials: true,
-}))
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+app.options('*', cors());
+
 
 app.use(express.json({ limit: "16kb" }))
 app.use(express.urlencoded({ extended: true, limit: "16kb" }))
