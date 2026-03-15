@@ -8,7 +8,9 @@ export default function getStartDateForRange(range){
         "1y": 365 * 24 * 60 * 60 * 1000
     };
 
-    //By default,return all the applications throughout the life of the user, not filtering by date
-    const duration = ranges[range] || Infinity;
+    // For all-time analytics, return null so callers can skip date filtering entirely.
+    const duration = ranges[range];
+    if (!duration) return null
+
     return new Date(now - duration);
 }

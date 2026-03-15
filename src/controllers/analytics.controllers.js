@@ -23,13 +23,18 @@ const analyticOverview = asyncHandler(async (req, res) => {
     const initialDate = getStartDateForRange(range);
 
 
+    const matchStage = {
+        userId: userObjId
+    }
+
+    if (initialDate) {
+        matchStage.appliedDate = { $gte: initialDate, $lte: new Date() }
+    }
+
     const aggregationPipeline = [
         // 1) filter by user and date range
         {
-            $match: {
-                userId: userObjId,
-                appliedDate: { $gte: initialDate, $lte: new Date() }
-            }
+            $match: matchStage
         },
 
         // 2) compute raw grouped arrays via facet

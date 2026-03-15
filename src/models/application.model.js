@@ -78,6 +78,10 @@ const applicationSchema = new mongoose.Schema({
     },
 }, { timestamps: true });
 
+// Optimizes user-scoped list queries and analytics date-range filters.
+applicationSchema.index({ userId: 1, createdAt: -1 })
+applicationSchema.index({ userId: 1, appliedDate: -1 })
+
 
 const Application = mongoose.model('Application', applicationSchema);
 

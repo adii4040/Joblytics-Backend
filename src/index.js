@@ -18,4 +18,7 @@ connectDb()
 
         app.listen( port , () => console.log(`⚙️ Server successfully running on port: ${port}`))
     })
-    .catch((err) => console.log(`Error connecting database ERROR:${err}`))
+    .catch((err) => {
+        console.log(`Error connecting database ERROR:${err}`)
+        process.exit(1)
+    })
