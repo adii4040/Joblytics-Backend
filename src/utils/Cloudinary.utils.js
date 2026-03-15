@@ -2,7 +2,7 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 import { v2 as cloudinary } from 'cloudinary';
-import fs from "fs"
+import { promises as fs } from "fs"
 
 
 // Configuration
@@ -17,31 +17,33 @@ cloudinary.config({
 //method to upload the files on cloudinary
 
 const uploadOnCloudinary = async (localfilePath) => {
+    if (!localfilePath) {
+        console.log('No file to upload on cloudinary')
+        return null
+    }
 
     try {
-
-        if (!localfilePath) return console.log('No file to upload on cloudinary')
-
-        // Upload a file on cloudinary
         const uploadResponse = await cloudinary.uploader.upload(localfilePath, {
             secure: true,
             folder: "JobHunt",  //all the files will be stored in this folder
             resource_type: "auto", //this will allow all type of files like pdf, docx, images etc
             use_filename: true,
             unique_filename: false,
-
         })
-        //file has been successfully uploaded
 
-        fs.unlinkSync(localfilePath)  //once the file is uploaded, just delete it or remove it from the server
-        // console.log(uploadResponse.url)
         return uploadResponse
-
     } catch (error) {
-
-        fs.unlinkSync(localfilePath)  // remove the locally saved temporary file as the upload operation got failed
         console.log(`File Upload Unsuccessfull: ${error}`)
         return null
+    } finally {
+        // Always attempt to delete local temporary upload.
+        try {
+            await fs.unlink(localfilePath)
+        } catch (unlinkError) {
+            if (unlinkError?.code !== 'ENOENT') {
+                console.log(`Could not delete temporary file ${localfilePath}: ${unlinkError.message}`)
+            }
+        }
     }
 
 }

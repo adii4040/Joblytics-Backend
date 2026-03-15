@@ -1,6 +1,7 @@
 import express from 'express'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
+import fs from 'fs'
 
 
 const app = express()
@@ -45,6 +46,15 @@ app.use('/api/v1/analytics', analyticsRoutes)
 
 // Global error handler (must come after all routes)
 app.use((err, req, res, next) => {
+  // Best-effort cleanup for multer temp files on failed requests.
+  if (req.file?.path) {
+    try {
+      fs.unlinkSync(req.file.path)
+    } catch (_) {
+      // Ignore cleanup errors in error middleware.
+    }
+  }
+
   const statusCode = err.statusCode || 500;
   const message = err.message || "Internal Server Error";
 

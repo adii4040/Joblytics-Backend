@@ -51,7 +51,7 @@ const registerUser = asyncHandler(async (req, res) => {
         password,
         avatar: {
             url: avatar ? avatar?.secure_url : "https://png.pngtree.com/element_our/20200610/ourmid/pngtree-character-default-avatar-image_2237203.jpg",
-            localpath: avatarLocalPath
+            localpath: ""
         },
         
     })
@@ -351,8 +351,8 @@ const updateUser = asyncHandler(async (req, res) => {
         if (!avatar) throw new ApiError(404, "Avatar file is required!!")
 
         user.avatar = {
-            url: avatar?.url,
-            localpath: avatarLocalPath
+            url: avatar?.secure_url || avatar?.url,
+            localpath: ""
         }
     }
 
